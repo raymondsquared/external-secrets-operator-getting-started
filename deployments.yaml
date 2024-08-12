@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-with-volume-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-with-volume
+  template:
+    metadata:
+      labels:
+        app: app-with-volume
+    spec:
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: eso-getting-started-secret
+      containers:
+        - name: app-with-volume
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: secret-volume
+              readOnly: true
+              mountPath: '/etc/secret-volume'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-with-env-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-with-env
+  template:
+    metadata:
+      labels:
+        app: app-with-env
+    spec:
+      containers:
+        - name: app-with-env
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: eso-getting-started-secret
